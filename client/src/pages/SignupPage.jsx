@@ -161,9 +161,6 @@ const SignupPage = () => {
         title="Join our Community"
         subtitle="Connect with Friends, Share Moments, and stay in touch with your loved ones."
       />
-
-
-
     </div>
   )
 }
