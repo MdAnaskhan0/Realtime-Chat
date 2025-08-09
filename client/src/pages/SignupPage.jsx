@@ -2,6 +2,9 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '../store/useAuthStore';
 import { Mail, MessageSquare, User, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import AuthImagePattern from '../components/AuthImagePattern';
+import { toast } from 'react-hot-toast';
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,15 +15,35 @@ const SignupPage = () => {
     password: "",
   });
 
-  const { signup, isSigninUp } = useAuthStore();
+  const { signUp, isSigninUp } = useAuthStore();
 
   const validateForm = () => {
+    if (!formData.fullName.trim()) {
+      return toast.error("Full Name is required"), false;
+    }
 
+    if (!formData.email.trim()) {
+      return toast.error("Email is required"), false;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return toast.error("Invalid Email format"), false;
+    }
+
+    if (!formData.password.trim()) {
+      return toast.error("Password is required"), false;
+    }
+    return true;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const success = validateForm();
+    if (success === true) {
+      signUp(formData);
+    }
   };
+
 
   return (
     <div className='min-h-screen grid lg:grid-cols-2'>
@@ -99,36 +122,48 @@ const SignupPage = () => {
                 <button
                   type="button"
                   className='absolute inset-y-0 right-0 flex items-center pr-3'
-                  onClick={()=>{setShowPassword(!showPassword)}}
-                  >
-                    {
-                      showPassword ? (
-                        <EyeOff className='size-5 text-base-content/40' />
-                      ) : (
-                        <Eye className='size-5 text-base-content/40' />
-                      )
-                    }
+                  onClick={() => { setShowPassword(!showPassword) }}
+                >
+                  {
+                    showPassword ? (
+                      <EyeOff className='size-5 text-base-content/40' />
+                    ) : (
+                      <Eye className='size-5 text-base-content/40' />
+                    )
+                  }
                 </button>
               </div>
             </div>
 
 
             {/* Submit Button */}
-            <button 
+            <button
               type='submit'
               className='btn btn-primary w-full' disabled={isSigninUp}>
-                {
-                  isSigninUp ? (<>
-                    <Loader2 className='size-5 animate-spin' />Loading...
-                  </>) : (
-                    "Create Account"
-                  )
-                }
+              {
+                isSigninUp ? (<>
+                  <Loader2 className='size-5 animate-spin' />Loading...
+                </>) : (
+                  "Create Account"
+                )
+              }
             </button>
-
           </form>
+
+          <div className='text-center'>
+            <p className='text-base-content/60'>Already have an account? <Link to='/login' className='link link-primary'>Login</Link></p>
+          </div>
         </div>
       </div>
+
+      {/* Right Side */}
+      <AuthImagePattern
+        title="Join our Community"
+        subtitle="Connect with Friends, Share Moments, and stay in touch with your loved ones."
+      />
+
+
+
     </div>
   )
 }

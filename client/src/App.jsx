@@ -9,6 +9,7 @@ import SignupPage from './pages/SignupPage';
 import SettingsPage from './pages/SettingsPage';
 import { useAuthStore } from './store/useAuthStore';
 import { Loader } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
 
 
 const App = () => {
@@ -40,6 +41,8 @@ const App = () => {
 
         <Route path="/settings" element={!authUser ? <SettingsPage /> : <Navigate to="/" />} />
       </Routes>
+
+      <Toaster />
     </div>
   )
 }
