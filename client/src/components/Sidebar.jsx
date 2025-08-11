@@ -1,14 +1,15 @@
 import React from 'react'
 import { useEffect } from 'react'
 import { useChatStore } from '../store/useChatStore'
+import { useAuthStore } from '../store/useAuthStore';
 import SidebarSkeleton from './skeleton/SidebarSkeleton.jsx'
 import { Users } from 'lucide-react'
 import Avater from "../assets/Avater.png"
 
 const Sidebar = () => {
-    const { getUsers, users, selectedUser, getSelectedUser, isUserLoadeing } = useChatStore();
+    const { getUsers, users, selectedUser, setSelectedUser, isUserLoadeing } = useChatStore();
 
-    const onlineUsers = [];
+    const { onlineUsers } = useAuthStore();
 
     useEffect(() => {
         getUsers();
@@ -17,7 +18,7 @@ const Sidebar = () => {
     if (isUserLoadeing) return <SidebarSkeleton />
 
     return (
-        <aside className='h-full w-20 lg-w-72 border-r border-base-300 flex flex-col transition-all duration-200'>
+        <aside className='h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200'>
             <div className='border-b border-base-300 w-full p-5'>
                 <div className='flex items-center gap-2'>
                     <Users className='size-6' />
@@ -28,7 +29,7 @@ const Sidebar = () => {
 
             <div className='overflow-y-auto w-full py-3'>
                 {users.map((user) => (
-                    <button key={user.id} className={`w-full p-3 flex items-center gap-3 hover::bg-base-300 transition-colors ${selectedUser?._id === user._id ? "bg-base-300 ring-1 ring-base-300" : ""}`} onClick={() => setlSelectedUser(user)}>
+                    <button key={user.id} className={`w-full p-3 flex items-center gap-3 hover::bg-base-300 transition-colors ${selectedUser?._id === user._id ? "bg-base-300 ring-1 ring-base-300" : ""}`} onClick={() => setSelectedUser(user)}>
                         <div className='relative mx-auto lg:mx-0'>
                             <img src={user.profilePic || Avater} alt={user.name} className='size-12 object-cover rounded-full' />
                             {onlineUsers.includes(user._id) && (
@@ -38,7 +39,12 @@ const Sidebar = () => {
                         </div>
 
                         {/* user info skeleton - only visible on larger screens */}
-
+                        <div className='hidden lg:block text-left min-w-0'>
+                            <div className='font-medium truncate'>{user.fullName}</div>
+                            <div className='text-sm text-zinc-400'>
+                                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+                            </div>
+                        </div>
                     </button>
                 ))}
 
