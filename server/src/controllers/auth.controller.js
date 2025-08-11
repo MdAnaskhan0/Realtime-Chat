@@ -107,6 +107,13 @@ export const uploadProfile = async (req, res) => {
             return res.status(400).json({ message: "Profile picture is required" });
         }
 
+        console.log({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET ? "SET" : "NOT SET"
+        });
+
+
         const uploadResponse = await cloudinary.uploader.upload(profilePic)
 
         const updateUser = await USER.findByIdAndUpdate(userID, { profilePic: uploadResponse.secure_url }, { new: true });
