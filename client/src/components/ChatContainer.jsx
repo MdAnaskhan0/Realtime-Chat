@@ -9,17 +9,27 @@ import Avater from '../assets/Avater.png';
 import { formatMessageTime } from '../lib/utils';
 
 const ChatContainer = () => {
-  const { message, getMessages, isMessageLoading, selectedUser } = useChatStore();
-
-  console.log("message", message);
-  console.log("selectedUser", selectedUser);
-  console.log("getMessages", getMessages);
+  const { message, getMessages, isMessageLoading, selectedUser, subScribeToMessage, unSubscribeFromMessage } = useChatStore();
 
   const { authUser } = useAuthStore();
 
+  // useEffect(() => {
+  //   getMessages(selectedUser._id);
+  //   subScribeToMessage();
+  //   return () => {
+  //     unSubscribeFromMessage();
+  //   }
+  // }, [selectedUser._id, getMessages, subScribeToMessage, unSubscribeFromMessage])
+
   useEffect(() => {
-    getMessages(selectedUser._id);
-  }, [selectedUser._id, getMessages])
+    if (selectedUser?._id) {
+      getMessages(selectedUser._id);
+      subScribeToMessage();
+    }
+    return () => {
+      unSubscribeFromMessage();
+    }
+  }, [selectedUser?._id]);
 
   if (isMessageLoading) return (
     <div className='flex-1 flex flex-col overflow-auto'>
@@ -58,7 +68,7 @@ const ChatContainer = () => {
             </div>
           </div>
         ))}
- 
+
       </div>
 
       <MessageInput />
