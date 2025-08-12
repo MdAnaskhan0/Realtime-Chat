@@ -48,7 +48,7 @@ export const useChatStore = create((set, get) => ({
 
     subScribeToMessage: async () => {
         const { selectedUser } = get();
-        if (!selectedUser) return;
+        if (!selectedUser?._id) return;
 
         const socket = useAuthStore.getState().socket;
 

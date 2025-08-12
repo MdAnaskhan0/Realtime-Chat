@@ -13,23 +13,13 @@ const ChatContainer = () => {
 
   const { authUser } = useAuthStore();
 
-  // useEffect(() => {
-  //   getMessages(selectedUser._id);
-  //   subScribeToMessage();
-  //   return () => {
-  //     unSubscribeFromMessage();
-  //   }
-  // }, [selectedUser._id, getMessages, subScribeToMessage, unSubscribeFromMessage])
-
   useEffect(() => {
-    if (selectedUser?._id) {
-      getMessages(selectedUser._id);
-      subScribeToMessage();
-    }
+    getMessages(selectedUser._id);
+    subScribeToMessage();
     return () => {
       unSubscribeFromMessage();
     }
-  }, [selectedUser?._id]);
+  }, [selectedUser._id, getMessages, subScribeToMessage, unSubscribeFromMessage])
 
   if (isMessageLoading) return (
     <div className='flex-1 flex flex-col overflow-auto'>
