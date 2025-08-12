@@ -21,8 +21,8 @@ export const getMessage = async (req, res) => {
 
         const message = await MESSAGE.find({
             $or: [
-                { senderId: myID, receiverId: userToChatId },
-                { senderId: userToChatId, receiverId: myID }
+                { senderID: myID, receiverID: userToChatId },
+                { senderID: userToChatId, receiverID: myID }
             ]
         })
 
@@ -36,7 +36,7 @@ export const getMessage = async (req, res) => {
 export const sendMessage = async (req, res) => {
     try {
         const { text, image } = req.body;
-        const { id: receiverId } = req.params;
+        const { id } = req.params;
         const senderID = req.user._id;
 
         let imageUrl;
@@ -47,14 +47,14 @@ export const sendMessage = async (req, res) => {
 
         const newMessage = new MESSAGE({
             senderID,
-            receiverId,
+            receiverID: id,
             text,
             image: imageUrl
         });
 
         await newMessage.save();
 
-        
+
         // Todo: realtime functionality goes here => socket.io
         res.status(201).json(newMessage);
     } catch (error) {

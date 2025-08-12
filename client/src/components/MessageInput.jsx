@@ -1,7 +1,8 @@
 import React from 'react'
 import { useState, useRef } from 'react'
 import { useChatStore } from '../store/useChatStore';
-import { X, Image } from 'lucide-react';
+import { X, Image, Send } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const MessageInput = () => {
     const [text, setText] = useState('');
@@ -11,17 +12,44 @@ const MessageInput = () => {
 
     // Image preview
     const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please select an image file");
+            return;
+        }
 
-    }
+        const reader = new FileReader();
+        reader.onload = () => {
+            setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+    };
+
 
     // Remove image
     const removeImage = () => {
-
+        setImagePreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
     // Submit message
-    const handleSubmitMessage = (e) => {
+    const handleSubmitMessage = async (e) => {
+        e.preventDefault();
+        if (!text.trim() && !imagePreview) return;
 
+        try {
+            await sendMessage({
+                text: text.trim(),
+                image: imagePreview
+            })
+
+            // Clear input
+            setText('');
+            setImagePreview(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        } catch (error) {
+            console.log("Faild to send message", error);
+        }
     }
 
     return (
@@ -41,7 +69,7 @@ const MessageInput = () => {
             <form onSubmit={handleSubmitMessage} className='flex items-center gap-2'>
                 <div className='flex-1 flex gap-2'>
                     {/* Text input */}
-                    <input type="text" className='w-full input-bordered rounded-full input-sm sm:input-md' placeholder='Type a message...' value={text} onChange={(e) => setText(e.target.value)} />
+                    <input type="text" className='w-full input-bordered rounded-full input-md sm:input-md pl-4' placeholder='Type a message...' value={text} onChange={(e) => setText(e.target.value)} />
 
                     {/* Image input */}
                     <input type="file" accept='image/*' className='hidden' ref={fileInputRef} onChange={handleImageChange} />
@@ -54,10 +82,10 @@ const MessageInput = () => {
                     >
                         <Image size={20} />
                     </button>
-
-
-
                 </div>
+                <button type='button' className='btn btn-circle' disabled={!text.trim() && !imagePreview} onClick={handleSubmitMessage}>
+                    <Send size={22} />
+                </button>
             </form>
         </div>
     )
