@@ -1,14 +1,18 @@
 import { create } from 'zustand';
 import { axiosInStance } from '../lib/axios';
 import toast from 'react-hot-toast';
+import io from 'socket.io-client';
 
-export const useAuthStore = create((set) => ({
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+
+export const useAuthStore = create((set, get) => ({
     authUser: null,
     isSigninUp: false,
     isLoggingIng: false,
     isUpdatingProfile: false,
     isCheckingAuth: true,
     onlineUsers: [],
+    socket: null,
 
 
 
@@ -17,6 +21,8 @@ export const useAuthStore = create((set) => ({
             const response = await axiosInStance.get('/auth/check');
 
             set({ authUser: response.data });
+            get().connectSocket();
+
         } catch (error) {
             console.log("Error in checkAuth: ", error);
             set({ authUser: null });
@@ -31,6 +37,7 @@ export const useAuthStore = create((set) => ({
             const response = await axiosInStance.post('/auth/signup', data);
             set({ authUser: response.data });
             toast.success("Account created successfully");
+            get().connectSocket();
         } catch (error) {
             toast.error(error.response?.data?.message);
         } finally {
@@ -44,6 +51,8 @@ export const useAuthStore = create((set) => ({
             const response = await axiosInStance.post('/auth/login', data);
             set({ authUser: response.data });
             toast.success("Logged in successfully");
+
+            get().connectSocket();
         } catch (error) {
             toast.error(error.response?.data?.message);
         } finally {
@@ -51,11 +60,12 @@ export const useAuthStore = create((set) => ({
         }
     },
 
-    logout: async () =>{
+    logout: async () => {
         try {
             const response = await axiosInStance.post('/auth/logout');
             set({ authUser: null });
             toast.success("Logged out successfully");
+            get().disconnectSocket();
         } catch (error) {
             toast.error(error.response?.data?.message);
         }
@@ -70,8 +80,26 @@ export const useAuthStore = create((set) => ({
         } catch (error) {
             console.log("Error in uploadProfile: ", error);
             toast.error(error.response?.data?.message);
-        }finally {
+        } finally {
             set({ isUpdatingProfile: false });
         }
+    },
+
+    connectSocket: async () => {
+        const { authUser } = get();
+        if (!authUser || get().socket?.connected) return;
+
+        const socket = io(SOCKET_URL, {
+            query: {
+                userId: authUser._id,
+            }
+        })
+        socket.connect();
+
+        set({ socket });
+    },
+
+    disconnectSocket: async () => {
+        if (get().socket?.connected) get().socket.disconnect();
     },
 }));
